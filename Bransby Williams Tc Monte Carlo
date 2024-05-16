@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the number of simulations
+num_simulations = 10000
+
+# Define the input distributions
+# For this example, we'll assume normal distributions for simplicity.
+# In practice, these should be based on real data or expert judgment.
+
+L_mean = 5000  # mean length of the longest watercourse in meters
+L_std = 500    # standard deviation
+
+n_mean = 0.04  # mean Manning's roughness coefficient
+n_std = 0.01   # standard deviation
+
+H_mean = 2.0   # mean hydraulic radius in meters
+H_std = 0.5    # standard deviation
+
+S_mean = 0.05  # mean slope of the catchment (m/m)
+S_std = 0.01   # standard deviation
+
+k = 0.1        # constant value
+
+# Generate random samples for each variable
+L_samples = np.random.normal(L_mean, L_std, num_simulations)
+n_samples = np.random.normal(n_mean, n_std, num_simulations)
+H_samples = np.random.normal(H_mean, H_std, num_simulations)
+S_samples = np.random.normal(S_mean, S_std, num_simulations)
+
+# Ensure all samples are positive and reasonable (e.g., hydraulic radius can't be negative)
+L_samples = np.clip(L_samples, 0, None)
+n_samples = np.clip(n_samples, 0, None)
+H_samples = np.clip(H_samples, 0, None)
+S_samples = np.clip(S_samples, 0, None)
+
+# Calculate time of concentration for each set of samples
+t_c_samples = k * (L_samples * n_samples) / (H_samples ** 0.5 * S_samples ** 0.333)
+
+# Plot the results
+plt.figure(figsize=(12, 6))
+plt.hist(t_c_samples, bins=50, alpha=0.7, color='blue')
+plt.xlabel('Time of Concentration (hours)')
+plt.ylabel('Frequency')
+plt.title('Monte Carlo Simulation of Time of Concentration using Bransby Williams Formula')
+plt.grid(True)
+plt.show()
+
+# Calculate the 85% confidence interval
+confidence_level = 0.85
+lower_percentile = (1 - confidence_level) / 2 * 100
+upper_percentile = (1 + confidence_level) / 2 * 100
+
+t_c_lower = np.percentile(t_c_samples, lower_percentile)
+t_c_upper = np.percentile(t_c_samples, upper_percentile)
+
+# Print statistical summaries
+print(f"Mean Time of Concentration: {np.mean(t_c_samples):.2f} hours")
+print(f"Standard Deviation: {np.std(t_c_samples):.2f} hours")
+print(f"85% Confidence Interval: ({t_c_lower:.2f}, {t_c_upper:.2f}) hours")
